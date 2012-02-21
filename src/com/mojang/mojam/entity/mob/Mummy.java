@@ -64,7 +64,7 @@ public class Mummy extends Mob {
     }
 
     @Override
-    public String getDeatchSound() {
+    public String getDeathSound() {
         return "/sound/Enemy Death 2.wav";
     }
 }
