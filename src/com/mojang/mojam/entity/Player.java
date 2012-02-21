@@ -392,7 +392,7 @@ public class Player extends Mob implements LootCollector {
             return false;
         }
 
-        score -= cost;
+        payCost(cost);
         return true;
     }
 
