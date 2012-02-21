@@ -103,6 +103,11 @@ public class Harvester extends Building implements LootCollector {
         return money < capacity;
     }
 
+    public void renderMarker(Screen screen) {
+    	// TODO Render upgrade text here with cost
+    	super.renderMarker(screen);
+    }
+    
     public void render(Screen screen) {
         Bitmap image = getSprite();
 

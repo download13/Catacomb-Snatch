@@ -29,6 +29,7 @@ public class Building extends Mob implements IUsable {
     }
 
     protected void renderMarker(Screen screen) {
+    	// TODO Make this draw an image once, then blit it onto another every time, might be faster
         if (highlight) {
             BB bb = getBB();
             bb = bb.grow((getSprite().w - (bb.x1 - bb.x0)) / (3 + Math.sin(System.currentTimeMillis() * .01)));
