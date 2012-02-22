@@ -1,5 +1,6 @@
 package com.mojang.mojam.entity.building;
 
+import com.mojang.mojam.MojamComponent;
 import com.mojang.mojam.entity.*;
 import com.mojang.mojam.entity.mob.Mob;
 import com.mojang.mojam.gui.Font;
@@ -47,7 +48,7 @@ public class Building extends Mob implements IUsable {
             }
             screen.blit(marker, bb.x0, bb.y0 - 4);
             
-            if(upgradeLevel < maxUpgradeLevel) { // If we can upgrade this
+            if(isUpgradable()) {
             	int toLevel = upgradeLevel + 1;
             	String upgradeText = upgradeCosts[toLevel] + " TO UPGRADE TO LEVEL " + (toLevel + 1);
             	int startX = (int) (bb.x0 + (width / 2) - (Font.getStringWidth(upgradeText) / 2));
@@ -99,6 +100,9 @@ public class Building extends Mob implements IUsable {
         ++upgradeLevel;
         p.useMoney(cost);
         upgradeComplete(upgradeLevel);
+        
+        MojamComponent.soundPlayer.playSound("/sound/Big Gem.wav", (float) pos.x, (float) pos.y);
+        
         return true;
     }
 
@@ -109,6 +113,10 @@ public class Building extends Mob implements IUsable {
         upgradeCosts = costs;
         maxUpgradeLevel = costs.length - 1;
         upgradeComplete(0);
+    }
+    
+    public boolean isUpgradable() {
+    	return upgradeLevel != maxUpgradeLevel;
     }
 
     public void use(Entity user) {

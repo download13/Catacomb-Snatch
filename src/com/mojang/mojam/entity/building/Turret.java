@@ -30,7 +30,7 @@ public class Turret extends Building {
         freezeTime = 10;
 
         makeUpgradeableWithCosts(new int[] {
-                1000, 3000, 9000
+        		0, 500, 850
         });
     }
 
@@ -73,9 +73,6 @@ public class Turret extends Building {
     public Bitmap getSprite() {
         return Art.turret[facing][0];
     }
-
-    int upgradeLevel = 0;
-    int maxUpgradeLevel = 2;
 
     protected void upgradeComplete(int upgradeLevel) {
         delay = upgradeDelay[upgradeLevel];

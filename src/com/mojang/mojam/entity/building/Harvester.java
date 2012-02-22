@@ -27,7 +27,7 @@ public class Harvester extends Building implements LootCollector {
             (int) (1.5 * Tile.WIDTH), 2 * Tile.WIDTH, (int) (2.5 * Tile.WIDTH)
     };
     private int[] upgradeCapacities = new int[] {
-            1500, 2500, 3500
+            1000, 2000, 3000
     };
 
     public Harvester(double x, double y, int team) {
@@ -35,7 +35,7 @@ public class Harvester extends Building implements LootCollector {
         setStartHealth(20);
         freezeTime = 10;
         makeUpgradeableWithCosts(new int[] {
-                1000, 3000, 9000
+                0, 600, 1000
         });
     }
 
@@ -104,7 +104,6 @@ public class Harvester extends Building implements LootCollector {
     }
 
     public void renderMarker(Screen screen) {
-    	// TODO Render upgrade text here with cost
     	super.renderMarker(screen);
     }
     

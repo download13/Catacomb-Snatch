@@ -1,5 +1,7 @@
 package com.mojang.mojam.entity.building;
 
+import java.util.ArrayList;
+
 import com.mojang.mojam.entity.mob.*;
 import com.mojang.mojam.network.TurnSynchronizer;
 import com.mojang.mojam.screen.*;
@@ -7,10 +9,14 @@ import com.mojang.mojam.screen.*;
 
 public class SpawnerEntity extends Building {
     public static final int SPAWN_INTERVAL = 60 * 4;
-
+    public static final int SPAWN_LIMIT = 30;
+    
     public int spawnTime = 0;
 
     public int type;
+    
+    private ArrayList<Mob> mobs = new ArrayList<Mob>();
+    private ArrayList<Mob> mobsToRemove = new ArrayList<Mob>();
 
     public SpawnerEntity(double x, double y, int team, int type) {
         super(x, y, team);
@@ -28,16 +34,23 @@ public class SpawnerEntity extends Building {
         super.tick();
         if (freezeTime > 0) return;
 
-        if (--spawnTime <= 0) {
+        if (--spawnTime <= 0 && mobs.size() <= SPAWN_LIMIT) {
             spawn();
             spawnTime = SPAWN_INTERVAL;
         }
+        
+        for (Mob m : mobs) {
+        	if (m.removed) {
+        		mobsToRemove.add(m);
+        	}
+        }
+        mobs.removeAll(mobsToRemove);
+        mobsToRemove.clear();
     }
 
     private void spawn() {
         double x = pos.x + (TurnSynchronizer.synchedRandom.nextFloat() - 0.5) * 5;
         double y = pos.y + (TurnSynchronizer.synchedRandom.nextFloat() - 0.5) * 5;
-//        Mob te = new Mummy(x, y);
 
         Mob te = null;
         if (type == 0) te = new Bat(x, y);
@@ -46,6 +59,7 @@ public class SpawnerEntity extends Building {
 
         if (level.getEntities(te.getBB().grow(8), te.getClass()).size() == 0) {
             level.addEntity(te);
+            mobs.add(te);
         }
     }
 
@@ -58,10 +72,12 @@ public class SpawnerEntity extends Building {
     public Bitmap getSprite() {
         int newIndex = 3 - (3 * health) / maxHealth;
         if (newIndex != lastIndex) {
-//            if (newIndex > lastIndex) // means more hurt
-//level.addEntity(new SmokeAnimation(pos.x - 12, pos.y - 20, Art.fxSteam24, 40));
             lastIndex = newIndex;
         }
         return Art.mobSpawner[newIndex][0];
+    }
+    
+    public boolean isHighlightable() { // Not sure about this, was that a bug or a feature?
+        return false;
     }
 }

@@ -109,7 +109,6 @@ public class Player extends Mob implements LootCollector {
             xa++;
         }
 
-        // TODO I seem to have broken picking up and placing spawners, fix
         xAim = controls.mouseX - MojamComponent.MIDDLEX;
     	yAim = controls.mouseY - MojamComponent.MIDDLEY;
         facing = (int) ((Math.atan2(-xAim, yAim) * 8 / (Math.PI * 2) + 8.5)) & 7;
@@ -235,27 +234,20 @@ public class Player extends Mob implements LootCollector {
 
             if (controls.use.wasPressed()) {
                 Vec2 buildPos = pos.clone();
-//                Tile tile = level.getTile(buildPos);
-//                if (tile != null && tile.isBuildable()) {
                 boolean allowed = true;
-/*
- * for (Entity e : level.getEntities(x - Building.MIN_BUILDING_DISTANCE, y -
- * Building.MIN_BUILDING_DISTANCE, x + Building.MIN_BUILDING_DISTANCE, y +
- * Building.MIN_BUILDING_DISTANCE, Building.class)) { if
- * (e.pos.distSqr(buildPos) < Building.MIN_BUILDING_DISTANCE) { allowed = false;
- * break; } }
- */
+                
                 if (allowed && (!(carrying instanceof IUsable) || (carrying instanceof IUsable && ((IUsable) carrying).isAllowedToCancel()))) {
                     carrying.removed = false;
                     
-                    carrying.xSlide = Math.copySign(5, xAim);
-                    carrying.ySlide = Math.copySign(5, yAim);
+
+                    double dir = Math.atan2(yAim, xAim);
+                    carrying.xSlide = Math.cos(dir) * 7;
+                    carrying.ySlide = Math.sin(dir) * 7;
                     carrying.freezeTime = 10;
                     carrying.setPos(buildPos.x, buildPos.y);
                     level.addEntity(carrying);
                     carrying = null;
                 }
-//                }
             }
         } else {
             Entity closest = null;
@@ -281,6 +273,11 @@ public class Player extends Mob implements LootCollector {
                     selected = null;
                 } else if (selected instanceof IUsable && controls.use.wasPressed()) {
                     ((IUsable) selected).use(this);
+                } else if (selected instanceof Building) {
+                	Building selectedBuilding = (Building) selected;
+                	if (selectedBuilding.isUpgradable() && !selectedBuilding.isNotFriendOf(this) && controls.upgrade.wasPressed()) {
+                		selectedBuilding.upgrade(this);
+                	}
                 }
             }
 
@@ -403,7 +400,6 @@ public class Player extends Mob implements LootCollector {
         level.removeEntity(b);
         carrying = b;
         carrying.onPickup();
-        // level.addEntity( new SmokePuffAnimation(b, Art.fxDust12, 40));
     }
 
     public void setFacing(int facing) {
@@ -457,7 +453,7 @@ public class Player extends Mob implements LootCollector {
         hurt(bullet, 1);
     }
 
-    public String getDeatchSound() {
+    public String getDeathSound() {
         return "/sound/Death.wav";
     }
 }

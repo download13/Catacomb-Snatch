@@ -94,11 +94,6 @@ public abstract class Mob extends Entity {
 
     public void die() {
         int particles = 8;
-//
-//        for (int i = 0; i < particles; i++) {
-//            double dir = i * Math.PI * 2 / particles;
-//            level.addEntity(new Particle(pos.x, pos.y, Math.cos(dir), Math.sin(dir)));
-//        }
 
         if (getDeathPoints() > 0) {
             int loots = 4;
