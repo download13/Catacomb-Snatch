@@ -28,8 +28,13 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
     public static final int GAME_WIDTH = 512;
     public static final int GAME_HEIGHT = GAME_WIDTH * 3 / 4;
     public static final int SCALE = 2;
+    public static final int SCALE_WIDTH = GAME_WIDTH * SCALE;
+    public static final int SCALE_HEIGHT = GAME_HEIGHT * SCALE;
+    
+    public static final int MIDDLEX = SCALE_WIDTH / 2;
+    public static final int MIDDLEY = (SCALE_HEIGHT - 64) / 2;
+    
     private boolean running = true;
-    private Cursor emptyCursor;
     private double framerate = 60;
     private int fps;
     private Screen screen = new Screen(GAME_WIDTH, GAME_HEIGHT);
@@ -37,13 +42,10 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
 
     private Stack<GuiMenu> menuStack = new Stack<GuiMenu>();
 
-    private boolean mouseMoved = false;
-    private boolean mouseHidden = false;
-    private int mouseHideTime = 0;
     public MouseButtons mouseButtons = new MouseButtons();
-    public Keys keys = new Keys();
-    public Keys[] synchedKeys = {
-            new Keys(), new Keys()
+    public Controls controls = new Controls();
+    public Controls[] synchedControls = {
+            new Controls(), new Controls()
     };
     public Player[] players = new Player[2];
     public Player player;
@@ -59,12 +61,18 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
     private int createServerState = 0;
 
     public MojamComponent() {
-        this.setPreferredSize(new Dimension(GAME_WIDTH * SCALE, GAME_HEIGHT * SCALE));
-        this.setMinimumSize(new Dimension(GAME_WIDTH * SCALE, GAME_HEIGHT * SCALE));
-        this.setMaximumSize(new Dimension(GAME_WIDTH * SCALE, GAME_HEIGHT * SCALE));
-        this.addKeyListener(new InputHandler(keys));
+        this.setPreferredSize(new Dimension(SCALE_WIDTH, SCALE_HEIGHT));
+        this.setMinimumSize(new Dimension(SCALE_WIDTH, SCALE_HEIGHT));
+        this.setMaximumSize(new Dimension(SCALE_WIDTH, SCALE_HEIGHT));
+        
+        InputHandler inHandler = new InputHandler(controls);
+        this.addKeyListener(inHandler);
+        this.addMouseListener(inHandler);
+        this.addMouseMotionListener(inHandler);
+        
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
+        this.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
 
         TitleMenu menu = new TitleMenu(GAME_WIDTH, GAME_HEIGHT);
         addMenu(menu);
@@ -72,11 +80,9 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
     }
 
     public void mouseDragged(MouseEvent arg0) {
-        mouseMoved = true;
     }
 
     public void mouseMoved(MouseEvent arg0) {
-        mouseMoved = true;
     }
 
     public void mouseClicked(MouseEvent e) {
@@ -119,11 +125,6 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
         soundPlayer = new SoundPlayer();
         soundPlayer.startBackgroundMusic();
 
-        try {
-            emptyCursor = Toolkit.getDefaultToolkit().createCustomCursor(new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "empty");
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-        }
         setFocusTraversalKeysEnabled(false);
         requestFocus();
 
@@ -138,12 +139,12 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
 
         level.init();
 
-        players[0] = new Player(synchedKeys[0], level.width * Tile.WIDTH / 2 - 16, (level.height - 5 - 1) * Tile.HEIGHT - 16, Team.Team1);
+        players[0] = new Player(synchedControls[0], level.width * Tile.WIDTH / 2 - 16, (level.height - 5 - 1) * Tile.HEIGHT - 16, Team.Team1);
         players[0].setFacing(4);
         level.addEntity(players[0]);
         level.addEntity(new Base(34 * Tile.WIDTH, 7 * Tile.WIDTH, Team.Team1));
         if (isMultiplayer) {
-            players[1] = new Player(synchedKeys[1], level.width * Tile.WIDTH / 2 - 16, 7 * Tile.HEIGHT - 16, Team.Team2);
+            players[1] = new Player(synchedControls[1], level.width * Tile.WIDTH / 2 - 16, 7 * Tile.HEIGHT - 16, Team.Team2);
             level.addEntity(players[1]);
             level.addEntity(new Base(32 * Tile.WIDTH - 20, 32 * Tile.WIDTH - 20, Team.Team2));
         }
@@ -176,7 +177,7 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
 
         while (running) {
             if (!this.hasFocus()) {
-                keys.release();
+                controls.release();
             }
 
             double nsPerTick = 1000000000.0 / framerate;
@@ -315,15 +316,16 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
         if (level != null) {
             if (synchronizer.preTurn()) {
                 synchronizer.postTurn();
-                for (int index = 0; index < keys.getAll().size(); index++) {
-                    Keys.Key key = keys.getAll().get(index);
+                for (int index = 0; index < controls.getAll().size(); index++) {
+                    Controls.Key key = controls.getAll().get(index);
                     boolean nextState = key.nextState;
                     if (key.isDown != nextState) {
                         synchronizer.addCommand(new ChangeKeyCommand(index, nextState));
                     }
                 }
-                keys.tick();
-                for (Keys skeys : synchedKeys) {
+                synchronizer.addCommand(new MouseMoveCommand(controls.mouseX, controls.mouseY));
+                controls.tick();
+                for (Controls skeys : synchedControls) {
                     skeys.tick();
                 }
                 level.tick();
@@ -333,21 +335,7 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
         if (!menuStack.isEmpty()) {
             menuStack.peek().tick(mouseButtons);
         }
-        if (mouseMoved) {
-            mouseMoved = false;
-            mouseHideTime = 0;
-            if (mouseHidden) {
-                mouseHidden = false;
-                setCursor(null);
-            }
-        }
-        if (mouseHideTime < 60) {
-            mouseHideTime++;
-            if (mouseHideTime == 60) {
-                setCursor(emptyCursor);
-                mouseHidden = true;
-            }
-        }
+        
         mouseButtons.tick();
 
         if (createServerState == 1) {
@@ -383,7 +371,11 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
 
         if (packet instanceof ChangeKeyCommand) {
             ChangeKeyCommand ckc = (ChangeKeyCommand) packet;
-            synchedKeys[playerId].getAll().get(ckc.getKey()).nextState = ckc.getNextState();
+            synchedControls[playerId].getAll().get(ckc.getKey()).nextState = ckc.getNextState();
+        } else if (packet instanceof MouseMoveCommand) {
+        	MouseMoveCommand mmc = (MouseMoveCommand) packet;
+        	synchedControls[playerId].mouseX = mmc.getX();
+        	synchedControls[playerId].mouseY = mmc.getY();
         }
     }
 
@@ -437,7 +429,7 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
 
                                     }
                                     if (socket == null) {
-                                        System.out.println("asdf");
+                                        System.out.println("Waiting for connection");
                                         continue;
                                     }
                                     fail = false;

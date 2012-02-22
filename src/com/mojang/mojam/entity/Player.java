@@ -21,7 +21,7 @@ public class Player extends Mob implements LootCollector {
     public static final int COST_REMOVE_RAIL = 15;
     public static final int REGEN_INTERVAL = 60 * 3;
 
-    public Keys keys;
+    public Controls controls;
     public double xAim, yAim = 1;
     public int shootDelay = 0;
     public double xd, yd;
@@ -50,9 +50,9 @@ public class Player extends Mob implements LootCollector {
 
     private int regenDelay = 0;
 
-    public Player(Keys keys, int x, int y, int team) {
+    public Player(Controls controls, int x, int y, int team) {
         super(x, y, team);
-        this.keys = keys;
+        this.controls = controls;
 
         startX = x;
         startY = y;
@@ -89,36 +89,34 @@ public class Player extends Mob implements LootCollector {
         if (muzzleTicks > 0) {
             muzzleTicks--;
         }
-        if (keys.up.isDown || keys.down.isDown || keys.left.isDown || keys.right.isDown) {
+
+        if (controls.up.isDown || controls.down.isDown || controls.left.isDown || controls.right.isDown) {
             if ((carrying == null && steps % 10 == 0) || (steps % 20 == 0)) {
                 MojamComponent.soundPlayer.playSound("/sound/Step " + (TurnSynchronizer.synchedRandom.nextInt(2) + 1) + ".wav", (float) pos.x, (float) pos.y, true);
             }
             steps++;
         }
-        if (keys.up.isDown) {
+        if (controls.up.isDown) {
             ya--;
         }
-        if (keys.down.isDown) {
+        if (controls.down.isDown) {
             ya++;
         }
-        if (keys.left.isDown) {
+        if (controls.left.isDown) {
             xa--;
         }
-        if (keys.right.isDown) {
+        if (controls.right.isDown) {
             xa++;
         }
 
-        if (!keys.fire.isDown && xa * xa + ya * ya != 0) {
-            xAim *= 0.7;
-            yAim *= 0.7;
-            xAim += xa;
-            yAim += ya;
-            facing = (int) ((Math.atan2(-xAim, yAim) * 8 / (Math.PI * 2) + 8.5)) & 7;
-        }
+        // TODO I seem to have broken picking up and placing spawners, fix
+        xAim = controls.mouseX - MojamComponent.MIDDLEX;
+    	yAim = controls.mouseY - MojamComponent.MIDDLEY;
+        facing = (int) ((Math.atan2(-xAim, yAim) * 8 / (Math.PI * 2) + 8.5)) & 7;
 
-        if (xa != 0 || ya != 0) {
+        if (xa != 0 || ya != 0) { // This might be to even out speed so you don't go faster diagonally
             int facing2 = (int) ((Math.atan2(-xa, ya) * 8 / (Math.PI * 2) + 8.5)) & 7;
-            int diff = facing - facing2;
+            int diff = facing - facing2; // Get the difference between the actual facing and where we would be if we werent shooting
             if (diff >= 4) {
                 diff -= 8;
             }
@@ -168,7 +166,7 @@ public class Player extends Mob implements LootCollector {
         yBump *= 0.8;
         muzzleImage = (muzzleImage + 1) & 3;
 
-        if (carrying == null && keys.fire.isDown) {
+        if (carrying == null && controls.fire.isDown) {
             wasShooting = true;
             if (takeDelay > 0) {
                 takeDelay--;
@@ -203,7 +201,7 @@ public class Player extends Mob implements LootCollector {
         int x = (int) pos.x / Tile.WIDTH;
         int y = (int) pos.y / Tile.HEIGHT;
 
-        if (keys.build.isDown && !keys.build.wasDown) {
+        if (controls.build.isDown && !controls.build.wasDown) {
             if (level.getTile(x, y).isBuildable()) {
                 if (score >= COST_RAIL && time - lastRailTick >= RailDelayTicks) {
                     lastRailTick = time;
@@ -235,7 +233,7 @@ public class Player extends Mob implements LootCollector {
             carrying.setPos(pos.x, pos.y - 20);
             carrying.tick();
 
-            if (keys.use.wasPressed()) {
+            if (controls.use.wasPressed()) {
                 Vec2 buildPos = pos.clone();
 //                Tile tile = level.getTile(buildPos);
 //                if (tile != null && tile.isBuildable()) {
@@ -249,8 +247,9 @@ public class Player extends Mob implements LootCollector {
  */
                 if (allowed && (!(carrying instanceof IUsable) || (carrying instanceof IUsable && ((IUsable) carrying).isAllowedToCancel()))) {
                     carrying.removed = false;
-                    carrying.xSlide = xAim * 3;
-                    carrying.ySlide = yAim * 3;
+                    
+                    carrying.xSlide = Math.copySign(5, xAim);
+                    carrying.ySlide = Math.copySign(5, yAim);
                     carrying.freezeTime = 10;
                     carrying.setPos(buildPos.x, buildPos.y);
                     level.addEntity(carrying);
@@ -280,7 +279,7 @@ public class Player extends Mob implements LootCollector {
                 if (selected.pos.distSqr(getInteractPosition()) > INTERACT_DISTANCE) {
                     ((IUsable) selected).setHighlighted(false);
                     selected = null;
-                } else if (selected instanceof IUsable && keys.use.wasPressed()) {
+                } else if (selected instanceof IUsable && controls.use.wasPressed()) {
                     ((IUsable) selected).use(this);
                 }
             }
