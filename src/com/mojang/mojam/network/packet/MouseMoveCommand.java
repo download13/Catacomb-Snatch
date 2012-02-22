@@ -11,6 +11,9 @@ public class MouseMoveCommand extends NetworkCommand {
 	private int mouseX;
 	private int mouseY;
 	
+	public MouseMoveCommand() {
+	}
+	
 	public MouseMoveCommand(int x, int y) {
 		this.mouseX = x;
 		this.mouseY = y;
