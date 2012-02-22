@@ -66,7 +66,6 @@ public class RailDroid extends Mob {
 
         if (noTurnTime == 0 && (!cr || dir == 0 || centerIsh)) {
             noTurnTime = 4;
-//            int nd = 0;
             if (dir == 1 && lr) lWeight += 16;
             if (dir == 2 && ur) uWeight += 16;
             if (dir == 3 && rr) rWeight += 16;
@@ -146,11 +145,11 @@ public class RailDroid extends Mob {
             }
         }
         if (carrying && swapTime == 0) {
-            if (pos.y < 7 * Tile.HEIGHT) {
+            if (pos.y < 8 * Tile.HEIGHT) {
                 carrying = false;
                 level.player2Score += 2;
             }
-            if (pos.y > (level.height - 7 - 1) * Tile.HEIGHT) {
+            if (pos.y > (level.height - 8) * Tile.HEIGHT) {
                 carrying = false;
                 level.player1Score += 2;
             }
