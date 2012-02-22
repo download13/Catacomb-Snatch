@@ -125,22 +125,6 @@ public class Harvester extends Building implements LootCollector {
             screen.blit(image, pos.x - image.w / 2, pos.y - image.h + 8);
         }
         renderMarker(screen);
-        if (hurtTime > 0) {
-            if (hurtTime > 40 - 6 && hurtTime / 2 % 2 == 0) {
-                screen.colorBlit(image, pos.x - image.w / 2, pos.y - image.h + 8, 0xa0ffffff);
-            } else {
-                if (health < 0) {
-                    health = 0;
-                }
-                int col = 180 - health * 180 / maxHealth;
-                if (hurtTime < 10) {
-                    col = col * hurtTime / 10;
-                }
-                screen.colorBlit(image, pos.x - image.w / 2, pos.y - image.h + 8, (col << 24) + 255 * 65536);
-            }
-        } else {
-            screen.blit(image, pos.x - image.w / 2, pos.y - image.h + 8);
-        }
     }
 
     public void take(Loot loot) {

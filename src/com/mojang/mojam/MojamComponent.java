@@ -59,9 +59,11 @@ public class MojamComponent extends Canvas implements Runnable, MouseMotionListe
     private int createServerState = 0;
 
     public MojamComponent() {
+    	// Set canvas size
         this.setPreferredSize(new Dimension(GAME_WIDTH * SCALE, GAME_HEIGHT * SCALE));
         this.setMinimumSize(new Dimension(GAME_WIDTH * SCALE, GAME_HEIGHT * SCALE));
         this.setMaximumSize(new Dimension(GAME_WIDTH * SCALE, GAME_HEIGHT * SCALE));
+        
         this.addKeyListener(new InputHandler(keys));
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
