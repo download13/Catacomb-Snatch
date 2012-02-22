@@ -1,4 +1,8 @@
 This is a version of the source code that includes mouse-based control and upgrades.
+Stand next to a building and press Q to upgrade it.
+Mouse to aim.
+Left mouse button to fire.
+Right mouse button to 'use' (same as E).
 
 
 TODO

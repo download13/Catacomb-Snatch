@@ -99,7 +99,6 @@ public class RailDroid extends Mob {
                 dir = 0;
             } else {
                 int res = TurnSynchronizer.synchedRandom.nextInt(totalWeight);
-//                dir = 0;
                 dir = (((dir - 1) + 2) & 3) + 1;
 
                 uWeight += lWeight;
@@ -112,7 +111,6 @@ public class RailDroid extends Mob {
                 else if (res < dWeight) dir = 4;
             }
 
-//            dir = nd;
         }
 
         if (cr) {
@@ -121,8 +119,6 @@ public class RailDroid extends Mob {
             if (!(dir == 1 || dir == 3) && xcd > +r) xd -= 0.3;
             if (!(dir == 2 || dir == 4) && ycd < -r) yd += 0.3;
             if (!(dir == 2 || dir == 4) && ycd > +r) yd -= 0.3;
-//            if (!(dir == 1 || dir == 3) && xcd >= -r && xcd <= r) xd = -xcd;
-//            if (!(dir == 2 || dir == 4) && ycd >= -r && ycd <= r) yd = -ycd;
         }
         double speed = 0.7;
         if (dir > 0) lDir = dir;
@@ -159,7 +155,6 @@ public class RailDroid extends Mob {
                 level.player1Score += 2;
             }
         }
-//        level.getTile(xt, yt)
     }
 
     @Override
@@ -199,7 +194,6 @@ public class RailDroid extends Mob {
 
     @Override
     protected boolean shouldBlock(Entity e) {
-//        if (e instanceof Player && ((Player) e).team == team) return false;
         return super.shouldBlock(e);
     }
 
