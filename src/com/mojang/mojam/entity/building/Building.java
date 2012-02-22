@@ -2,6 +2,7 @@ package com.mojang.mojam.entity.building;
 
 import com.mojang.mojam.entity.*;
 import com.mojang.mojam.entity.mob.Mob;
+import com.mojang.mojam.gui.Font;
 import com.mojang.mojam.math.BB;
 import com.mojang.mojam.network.TurnSynchronizer;
 import com.mojang.mojam.screen.*;
@@ -29,12 +30,12 @@ public class Building extends Mob implements IUsable {
     }
 
     protected void renderMarker(Screen screen) {
-    	// TODO Make this draw an image once, then blit it onto another every time, might be faster
         if (highlight) {
             BB bb = getBB();
             bb = bb.grow((getSprite().w - (bb.x1 - bb.x0)) / (3 + Math.sin(System.currentTimeMillis() * .01)));
             int width = (int) (bb.x1 - bb.x0);
             int height = (int) (bb.y1 - bb.y0);
+            
             Bitmap marker = new Bitmap(width, height);
             for (int y = 0; y < height; y++) {
                 for (int x = 0; x < width; x++) {
@@ -45,6 +46,13 @@ public class Building extends Mob implements IUsable {
                 }
             }
             screen.blit(marker, bb.x0, bb.y0 - 4);
+            
+            if(upgradeLevel < maxUpgradeLevel) { // If we can upgrade this
+            	int toLevel = upgradeLevel + 1;
+            	String upgradeText = upgradeCosts[toLevel] + " TO UPGRADE TO LEVEL " + (toLevel + 1);
+            	int startX = (int) (bb.x0 + (width / 2) - (Font.getStringWidth(upgradeText) / 2));
+        		Font.draw(screen, upgradeText, startX, (int) (bb.y0 - 14));
+        	}
         }
     }
 
