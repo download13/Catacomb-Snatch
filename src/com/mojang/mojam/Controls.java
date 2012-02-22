@@ -2,7 +2,7 @@ package com.mojang.mojam;
 
 import java.util.*;
 
-public class Keys {
+public class Controls {
     public final class Key {
         public boolean nextState = false;
         public boolean wasDown = false;
@@ -39,6 +39,10 @@ public class Keys {
     public Key fire = new Key();
     public Key build = new Key();
     public Key use = new Key();
+    public Key upgrade = new Key();
+    
+    public int mouseX;
+    public int mouseY;
 
     public void tick() {
         for (Key key : all)
